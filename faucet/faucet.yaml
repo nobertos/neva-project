@@ -1,18 +1,15 @@
+acls:
+  office-acl:
+    - rule:
+        actions:
+          allow: true
+
 vlans:
   office:
     vid: 100
     description: "Office VLAN"
-    faucet_mac: "0e:00:00:00:10:01"
-    faucet_vips:
-      - '10.0.0.254/24'
-    routes:
-      - route:
-         ip_dst: '0.0.0.0/0'
-         ip_gw: '10.0.0.254'
-
 
 dps:
-        #core
   s1:
     dp_id: 0x1
     hardware: "Open vSwitch"
@@ -20,10 +17,12 @@ dps:
       1:
         name: "s2"
         native_vlan: office
+        acls_in: [office-acl]
       2:
         name: "s3"
         native_vlan: office
-       # aggregation
+        acls_in: [office-acl]
+
   s2:
     dp_id: 0x2
     hardware: "Open vSwitch"
@@ -31,15 +30,19 @@ dps:
       1:
         name: "s1"
         native_vlan: office
+        acls_in: [office-acl]
       2:
         name: "s3"
         native_vlan: office
+        acls_in: [office-acl]
       3:
         name: "s4"
         native_vlan: office
+        acls_in: [office-acl]
       4:
         name: "s5"
         native_vlan: office
+        acls_in: [office-acl]
 
   s3:
     dp_id: 0x3
@@ -48,15 +51,19 @@ dps:
       1:
         name: "s1"
         native_vlan: office
+        acls_in: [office-acl]
       2:
         name: "s2"
         native_vlan: office
+        acls_in: [office-acl]
       3:
         name: "s4"
         native_vlan: office
+        acls_in: [office-acl]
       4:
         name: "s5"
         native_vlan: office
+        acls_in: [office-acl]
 
   s4:
     dp_id: 0x4
@@ -65,18 +72,23 @@ dps:
       1:
         name: "s2"
         native_vlan: office
+        acls_in: [office-acl]
       2:
         name: "s3"
         native_vlan: office
+        acls_in: [office-acl]
       3:
         name: "h1"
         native_vlan: office
+        acls_in: [office-acl]
       4:
         name: "h2"
         native_vlan: office
+        acls_in: [office-acl]
       5:
         name: "h3"
         native_vlan: office
+        acls_in: [office-acl]
 
   s5:
     dp_id: 0x5
@@ -85,15 +97,20 @@ dps:
       1:
         name: "s2"
         native_vlan: office
+        acls_in: [office-acl]
       2:
         name: "s3"
         native_vlan: office
+        acls_in: [office-acl]
       3:
         name: "h4"
         native_vlan: office
+        acls_in: [office-acl]
       4:
         name: "h5"
         native_vlan: office
+        acls_in: [office-acl]
       5:
         name: "h6"
         native_vlan: office
+        acls_in: [office-acl]
