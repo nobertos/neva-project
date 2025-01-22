@@ -12,16 +12,16 @@ class ThreeLayerTopo(Topo):
         Topo.__init__(self)
 
         # Add Core Switch
-        core = self.addSwitch('s1', protocols='OpenFlow10,OpenFlow11,OpenFlow12,OpenFlow13,OpenFlow14,OpenFlow15', dpid='1')
+        core = self.addSwitch('s1')
 
         # Add Aggregation Switches
-        agg1 = self.addSwitch('s2', protocols='OpenFlow10,OpenFlow11,OpenFlow12,OpenFlow13,OpenFlow14,OpenFlow15', dpid='2')
-        agg2 = self.addSwitch('s3', protocols='OpenFlow10,OpenFlow11,OpenFlow12,OpenFlow13,OpenFlow14,OpenFlow15', dpid='3')
+        agg1 = self.addSwitch('s2')
+        agg2 = self.addSwitch('s3')
 
 
         # Add Access Switches
-        access1 = self.addSwitch('s4', protocols='OpenFlow10,OpenFlow11,OpenFlow12,OpenFlow13,OpenFlow14,OpenFlow15', dpid='4')
-        access2 = self.addSwitch('s5', protocols='OpenFlow10,OpenFlow11,OpenFlow12,OpenFlow13,OpenFlow14,OpenFlow15', dpid='5')
+        access1 = self.addSwitch('s4')
+        access2 = self.addSwitch('s5')
 
         # Add hosts (two hosts per access switch)
         h1 = self.addHost('h1')
