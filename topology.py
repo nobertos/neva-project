@@ -11,45 +11,44 @@ class ThreeLayerTopo(Topo):
         # Initialize topology
         Topo.__init__(self)
 
-        # Add Core Switch
-        core = self.addSwitch('s1')
+        # Core Layer
+        core = self.addSwitch('s1', dpid='0000000000000001')
 
-        # Add Aggregation Switches
-        agg1 = self.addSwitch('s2')
-        agg2 = self.addSwitch('s3')
+        # Aggregation Layer
+        agg1 = self.addSwitch('s2', dpid='0000000000000002')
+        agg2 = self.addSwitch('s3', dpid='0000000000000003')
 
+        # Access Layer
+        access1 = self.addSwitch('s4', dpid='0000000000000004')
+        access2 = self.addSwitch('s5', dpid='0000000000000005')
 
-        # Add Access Switches
-        access1 = self.addSwitch('s4')
-        access2 = self.addSwitch('s5')
+        # Add Hosts with IP addresses and MAC addresses
+        hosts = []
+        for i in range(1, 7):
+            host = self.addHost(f'h{i}', 
+                              ip=f'10.0.0.{i}/24',
+                              mac=f'00:00:00:00:00:{i:02d}')
+            hosts.append(host)
 
-        # Add hosts (two hosts per access switch)
-        h1 = self.addHost('h1')
-        h2 = self.addHost('h2')
-        h3 = self.addHost('h3')
-        h4 = self.addHost('h4')
-        h5 = self.addHost('h5')
-        h6 = self.addHost('h6')
+        # Connect hosts to access switches
+        self.addLink(hosts[0], access1)  # h1
+        self.addLink(hosts[1], access1)  # h2
+        self.addLink(hosts[2], access1)  # h3
+        self.addLink(hosts[3], access2)  # h4
+        self.addLink(hosts[4], access2)  # h5
+        self.addLink(hosts[5], access2)  # h6
 
-        # Add links between core and aggregation layers
+        # Core to Aggregation links
         self.addLink(core, agg1)
         self.addLink(core, agg2)
 
-        # Add links between aggregation switches (redundancy)
+        # Aggregation redundancy link
         self.addLink(agg1, agg2)
 
-        # Add cross links between aggregation and access layers
+        # Aggregation to Access links
         self.addLink(agg1, access1)
         self.addLink(agg1, access2)
         self.addLink(agg2, access1)
         self.addLink(agg2, access2)
-
-        # Connect hosts to access switches
-        self.addLink(access1, h1)
-        self.addLink(access1, h2)
-        self.addLink(access1, h3)
-        self.addLink(access2, h4)
-        self.addLink(access2, h5)
-        self.addLink(access2, h6)
 
 topos = { 'threelayer': ( lambda: ThreeLayerTopo() ) }
