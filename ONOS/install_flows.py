@@ -83,8 +83,8 @@ for datapath in datapaths:
         match = [{"type": "ETH_TYPE", "ethType": "0x0800"}, {"type": "IPV4_DST", "ip": "10.0.1.0/24"}]
         action = [{"type": "OUTPUT", "port": "FLOOD"}]
         add_flow(datapath, criterias=match, instructions=action, priority=60000)
-        match = [{"type": "ETH_TYPE", "ethType": "0x0806"}, {"type": "IPV4_DST", "ip": "10.0.1.0/24"}]
-        action = [{"type": "OUTPUT", "port": "FLOOD"}]
+        match = [{"type": "ETH_TYPE", "ethType": "0x0806"}]
+        action = [{"type": "OUTPUT", "port": "NORMAL"}]
         add_flow(datapath, criterias=match, instructions=action, priority=60000)
     
     elif datapath.endswith("5"):  # access switch
@@ -100,8 +100,8 @@ for datapath in datapaths:
         match = [{"type": "ETH_TYPE", "ethType": "0x0800"}, {"type": "IPV4_DST", "ip": "10.0.2.0/24"}]
         action = [{"type": "OUTPUT", "port": "FLOOD"}]
         add_flow(datapath, criterias=match, instructions=action, priority=60000)
-        match = [{"type": "ETH_TYPE", "ethType": "0x0806"}, {"type": "ARP_TPA", "ip": "10.0.2.0/24"}]
-        action = [{"type": "OUTPUT", "port": "FLOOD"}]
+        match = [{"type": "ETH_TYPE", "ethType": "0x0806"}]
+        action = [{"type": "OUTPUT", "port": "NORMAL"}]
         add_flow(datapath, criterias=match, instructions=action, priority=60000)
 
 resp = requests.post(
