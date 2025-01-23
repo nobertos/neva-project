@@ -40,12 +40,12 @@ dps:
                 description: "Agg1 -> Access1"
                 stack:
                    dp: s4
-                   port: 4
+                   port: 1
             4:
                 description: "Agg1 -> Access2"
                 stack:
                    dp: s5
-                   port: 4
+                   port: 1
 
     s3:  # Aggregation 2
         dp_id: 0x3
@@ -65,63 +65,63 @@ dps:
                 description: "Agg2 -> Access1"
                 stack:
                    dp: s4
-                   port: 5
+                   port: 2
             4:
                 description: "Agg2 -> Access2"
                 stack:
                    dp: s5
-                   port: 5
+                   port: 2
 
     s4:  # Access 1
         dp_id: 0x4
         hardware: "Open vSwitch"
         interfaces:
             1:
-                name: "h1"
-                description: "h1"
-                native_vlan: main
-            2:
-                name: "h2"
-                description: "h2"
-                native_vlan: main
-            3:
-                name: "h3"
-                description: "h3"
-                native_vlan: main
-            4:
                 description: "Access1 -> Agg1"
                 stack:
                    dp: s2
                    port: 3
-            5:
+            2:
                 description: "Access1 -> Agg2"
                 stack:
                    dp: s3
                    port: 3
+            3:
+                name: "h1"
+                description: "h1"
+                native_vlan: main
+            4:
+                name: "h2"
+                description: "h2"
+                native_vlan: main
+            5:
+                name: "h3"
+                description: "h3"
+                native_vlan: main
 
     s5:  # Access 2
         dp_id: 0x5
         hardware: "Open vSwitch"
         interfaces:
             1:
-                name: "h4"
-                description: "h4"
-                native_vlan: main
-            2:
-                name: "h5"
-                description: "h5"
-                native_vlan: main
-            3:
-                name: "h6"
-                description: "h6"
-                native_vlan: main
-            4:
                 description: "Access2 -> Agg1"
                 stack:
                    dp: s2
                    port: 4
-            5:
+            2:
                 description: "Access2 -> Agg2"
                 stack:
                    dp: s3
                    port: 4
+            3:
+                name: "h4"
+                description: "h4"
+                native_vlan: main
+            4:
+                name: "h5"
+                description: "h5"
+                native_vlan: main
+            5:
+                name: "h6"
+                description: "h6"
+                native_vlan: main

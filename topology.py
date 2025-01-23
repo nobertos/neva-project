@@ -22,7 +22,22 @@ class ThreeLayerTopo(Topo):
         access1 = self.addSwitch('s4', dpid='0000000000000004')
         access2 = self.addSwitch('s5', dpid='0000000000000005')
 
-        # Add Hosts with IP addresses and MAC addresses
+        # First establish all switch-to-switch connections
+        
+        # Core to Aggregation links
+        self.addLink(core, agg1)    # s1-eth1 <-> s2-eth1
+        self.addLink(core, agg2)    # s1-eth2 <-> s3-eth1
+
+        # Aggregation redundancy link
+        self.addLink(agg1, agg2)    # s2-eth2 <-> s3-eth2
+
+        # Aggregation to Access links
+        self.addLink(agg1, access1) # s2-eth3 <-> s4-eth1
+        self.addLink(agg2, access1) # s3-eth3 <-> s4-eth2
+        self.addLink(agg1, access2) # s2-eth4 <-> s5-eth1
+        self.addLink(agg2, access2) # s3-eth4 <-> s5-eth2
+
+        # Now add hosts and their connections
         hosts = []
         for i in range(1, 7):
             host = self.addHost(f'h{i}', 
@@ -31,24 +46,11 @@ class ThreeLayerTopo(Topo):
             hosts.append(host)
 
         # Connect hosts to access switches
-        self.addLink(hosts[0], access1)  # h1
-        self.addLink(hosts[1], access1)  # h2
-        self.addLink(hosts[2], access1)  # h3
-        self.addLink(hosts[3], access2)  # h4
-        self.addLink(hosts[4], access2)  # h5
-        self.addLink(hosts[5], access2)  # h6
-
-        # Core to Aggregation links
-        self.addLink(core, agg1)
-        self.addLink(core, agg2)
-
-        # Aggregation redundancy link
-        self.addLink(agg1, agg2)
-
-        # Aggregation to Access links
-        self.addLink(agg1, access1)
-        self.addLink(agg1, access2)
-        self.addLink(agg2, access1)
-        self.addLink(agg2, access2)
+        self.addLink(hosts[0], access1) # h1 <-> s4-eth3
+        self.addLink(hosts[1], access1) # h2 <-> s4-eth4
+        self.addLink(hosts[2], access1) # h3 <-> s4-eth5
+        self.addLink(hosts[3], access2) # h4 <-> s5-eth3
+        self.addLink(hosts[4], access2) # h5 <-> s5-eth4
+        self.addLink(hosts[5], access2) # h6 <-> s5-eth5
 
 topos = { 'threelayer': ( lambda: ThreeLayerTopo() ) }
