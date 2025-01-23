@@ -39,12 +39,14 @@ class ThreeLayerTopo(Topo):
 
         # Now add hosts and their connections
         hosts = []
-        for i in range(1, 7):
-            host = self.addHost(f'h{i}', 
-                              ip=f'10.0.0.{i}/24',
-                              mac=f'00:00:00:00:00:{i:02d}')
-            hosts.append(host)
-
+        # Hosts of switch 4
+        hosts.append(self.addHost('h1', ip='10.0.1.1/24', mac='00:00:00:00:00:01'))
+        hosts.append(self.addHost('h2', ip='10.0.1.2/24', mac='00:00:00:00:00:02'))
+        hosts.append(self.addHost('h3', ip='10.0.1.3/24', mac='00:00:00:00:00:03'))
+        # Hosts of switch 5
+        hosts.append(self.addHost('h4', ip='10.0.2.4/24', mac='00:00:00:00:00:04'))
+        hosts.append(self.addHost('h5', ip='10.0.2.5/24', mac='00:00:00:00:00:05'))
+        hosts.append(self.addHost('h6', ip='10.0.2.6/24', mac='00:00:00:00:00:06'))
         # Connect hosts to access switches
         self.addLink(hosts[0], access1) # h1 <-> s4-eth3
         self.addLink(hosts[1], access1) # h2 <-> s4-eth4
@@ -52,5 +54,9 @@ class ThreeLayerTopo(Topo):
         self.addLink(hosts[3], access2) # h4 <-> s5-eth3
         self.addLink(hosts[4], access2) # h5 <-> s5-eth4
         self.addLink(hosts[5], access2) # h6 <-> s5-eth5
+
+        # Add host internet
+        internet = self.addHost('hi', ip='1.1.1.1/30', mac='00:00:00:00:00:ff')
+        self.addLink(internet, core) # s1-eth3 <-> hi (internet)
 
 topos = { 'threelayer': ( lambda: ThreeLayerTopo() ) }
