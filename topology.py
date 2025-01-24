@@ -4,6 +4,7 @@ from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.node import RemoteController
 from mininet.cli import CLI
+from time import sleep
 
 class ThreeLayerTopo(Topo):
     "Three Layer Network Topology"
@@ -71,7 +72,8 @@ class ThreeLayerTopo(Topo):
 net = Mininet(topo=ThreeLayerTopo(), controller=RemoteController)
 net.start()
 
-net.get('h1').cmd("tcpdump -i h1-eth0 -w h1-eth0.pcap &")
+# to collect packets
+"""net.get('h1').cmd("tcpdump -i h1-eth0 -w h1-eth0.pcap &")
 net.get('h2').cmd("tcpdump -i h2-eth0 -w h2-eth0.pcap &")
 net.get('h3').cmd("tcpdump -i h3-eth0 -w h3-eth0.pcap &")
 net.get('h4').cmd("tcpdump -i h4-eth0 -w h4-eth0.pcap &")
@@ -87,7 +89,25 @@ net.get('s2').cmd("tcpdump -i s2-eth2 -w s2-eth2.pcap &")
 net.get('s2').cmd("tcpdump -i s2-eth3 -w s2-eth3.pcap &")
 net.get('s2').cmd("tcpdump -i s2-eth4 -w s2-eth4.pcap &")
 net.get('s3').cmd("tcpdump -i s3-eth3 -w s3-eth3.pcap &")
-net.get('s3').cmd("tcpdump -i s3-eth4 -w s3-eth4.pcap &")
+net.get('s3').cmd("tcpdump -i s3-eth4 -w s3-eth4.pcap &")"""
+
+# to perform iperf
+net.get('hi').cmd("iperf -s -u &")
+net.get('h2').cmd("iperf -s &")
+net.get('h5').cmd("iperf -s &")
+sleep(3)
+
+net.get('h1').cmd("iperf -c -u 1.1.1.1 -t 30 &")
+net.get('h4').cmd("iperf -c -u 1.1.1.1 -t 30 &")
+net.get('h3').cmd("iperf -c 10.0.2.5 -t 30 &")
+net.get('h6').cmd("iperf -c 10.0.1.2 -t 30 &")
+
+# perform ping
+net.get('h1').cmd("ping h2 &")
+net.get('h4').cmd("ping h5 &")
+net.get('h3').cmd("ping h6 &")
+net.get('h1').cmd("ping hi &")
+net.get('h4').cmd("ping hi &")
 
 CLI(net)  # Open the Mininet CLI
 net.stop()  # Stop the network when done
