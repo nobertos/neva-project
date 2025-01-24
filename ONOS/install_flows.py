@@ -43,6 +43,12 @@ for datapath in datapaths:
         action = [{"type": "OUTPUT", "port": "3"}]
         add_flow(datapath, criterias=match, instructions=action)
         # routing to hosts
+        match = [{"type": "ETH_TYPE", "ethType": "0x0806"}, {"type": "IN_PORT", "port": "3"}]
+        action = [{"type": "OUTPUT", "port": "4"}]
+        add_flow(datapath, criterias=match, instructions=action)
+        match = [{"type": "ETH_TYPE", "ethType": "0x0806"}, {"type": "IN_PORT", "port": "4"}]
+        action = [{"type": "OUTPUT", "port": "3"}]
+        add_flow(datapath, criterias=match, instructions=action)
         match = [{"type": "ETH_TYPE", "ethType": "0x0800"}, {"type": "IPV4_DST", "ip": "10.0.1.0/24"}]
         action = [{"type": "OUTPUT", "port": "1"}]
         add_flow(datapath, criterias=match, instructions=action)

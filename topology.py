@@ -60,7 +60,8 @@ class ThreeLayerTopo(Topo):
         self.addLink(hosts[7], access2) # hx2 <-> s4-eth6
 
         # Add host internet
-        internet = self.addHost('hi', ip='1.1.1.1/30', mac='00:00:00:00:00:ff')
+        internet = self.addHost('hi', ip='1.1.1.1/30', mac='00:00:00:00:00:ff', defaultRoute='via 1.1.1.2')
         self.addLink(internet, core) # s1-eth3 <-> hi (internet)
+        self.addLink(core, self.addHost('hx3', ip='1.1.1.2/30', mac='00:00:00:00:00:ff')) # s1-eth4 <-> hx3 (internet's gateway)
 
 topos = { 'threelayer': ( lambda: ThreeLayerTopo() ) }
