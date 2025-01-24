@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
 from mininet.topo import Topo
+from mininet.net import Mininet
+from mininet.node import RemoteController
+from mininet.cli import CLI
 
 class ThreeLayerTopo(Topo):
     "Three Layer Network Topology"
@@ -12,15 +15,15 @@ class ThreeLayerTopo(Topo):
         Topo.__init__(self)
 
         # Core Layer
-        core = self.addSwitch('s1', dpid='0000000000000001')
+        core = self.addSwitch('s1', dpid='0000000000000001', protocols='OpenFlow14')
 
         # Aggregation Layer
-        agg1 = self.addSwitch('s2', dpid='0000000000000002')
-        agg2 = self.addSwitch('s3', dpid='0000000000000003')
+        agg1 = self.addSwitch('s2', dpid='0000000000000002', protocols='OpenFlow14')
+        agg2 = self.addSwitch('s3', dpid='0000000000000003', protocols='OpenFlow14')
 
         # Access Layer
-        access1 = self.addSwitch('s4', dpid='0000000000000004')
-        access2 = self.addSwitch('s5', dpid='0000000000000005')
+        access1 = self.addSwitch('s4', dpid='0000000000000004', protocols='OpenFlow14')
+        access2 = self.addSwitch('s5', dpid='0000000000000005', protocols='OpenFlow14')
 
         # First establish all switch-to-switch connections
         
@@ -64,4 +67,27 @@ class ThreeLayerTopo(Topo):
         self.addLink(internet, core) # s1-eth3 <-> hi (internet)
         self.addLink(core, self.addHost('hx3', ip='1.1.1.2/30', mac='00:00:00:00:00:ff')) # s1-eth4 <-> hx3 (internet's gateway)
 
-topos = { 'threelayer': ( lambda: ThreeLayerTopo() ) }
+# topos = { 'threelayer': ( lambda: ThreeLayerTopo() ) }
+net = Mininet(topo=ThreeLayerTopo(), controller=RemoteController)
+net.start()
+
+net.get('h1').cmd("tcpdump -i h1-eth0 -w h1-eth0.pcap &")
+net.get('h2').cmd("tcpdump -i h2-eth0 -w h2-eth0.pcap &")
+net.get('h3').cmd("tcpdump -i h3-eth0 -w h3-eth0.pcap &")
+net.get('h4').cmd("tcpdump -i h4-eth0 -w h4-eth0.pcap &")
+net.get('h5').cmd("tcpdump -i h5-eth0 -w h5-eth0.pcap &")
+net.get('h6').cmd("tcpdump -i h6-eth0 -w h6-eth0.pcap &")
+net.get('hi').cmd("tcpdump -i hi-eth0 -w hi-eth0.pcap &")
+
+net.get('s1').cmd("tcpdump -i s1-eth1 -w s1-eth1.pcap &")
+net.get('s1').cmd("tcpdump -i s1-eth2 -w s1-eth2.pcap &")
+
+net.get('s2').cmd("tcpdump -i s2-eth2 -w s2-eth2.pcap &")
+
+net.get('s2').cmd("tcpdump -i s2-eth3 -w s2-eth3.pcap &")
+net.get('s2').cmd("tcpdump -i s2-eth4 -w s2-eth4.pcap &")
+net.get('s3').cmd("tcpdump -i s3-eth3 -w s3-eth3.pcap &")
+net.get('s3').cmd("tcpdump -i s3-eth4 -w s3-eth4.pcap &")
+
+CLI(net)  # Open the Mininet CLI
+net.stop()  # Stop the network when done
