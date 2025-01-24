@@ -1,127 +1,285 @@
+acls:
+
+  network_access1_acl:
+    - rule:
+        dl_type: 0x0800
+        nw_dst: "10.0.2.0/24"
+        actions:
+          allow: 1
+          output:
+            port: 2 
+    - rule:
+        dl_type: 0x0800
+        nw_src: "10.0.1.0/24"
+        actions:
+          allow: 1
+    - rule:
+        dl_type: 0x0800
+        actions:
+          allow: 1
+          output:
+            port: 1
+    - rule:
+        actions:
+          allow: 1
+
+  network_access2_acl:
+    - rule:
+        dl_type: 0x0800
+        nw_dst: "10.0.1.0/24"
+        actions:
+          allow: 1
+          output:
+            port: 1
+    - rule:
+        dl_type: 0x0800
+        nw_src: "10.0.2.0/24"
+        actions:
+          allow: 1
+    - rule:
+        dl_type: 0x0800
+        actions:
+          allow: 1
+          output:
+            port: 2
+    - rule:
+        actions:
+          allow: 1
+
+
+  agg1_acl:
+    - rule:
+        dl_type: 0x0800
+        nw_src: "10.0.2.0/24"
+        nw_dst: "10.0.1.0/24"
+        actions:
+          allow: 0
+          output:
+            port: 3
+    - rule:
+        dl_type: 0x0800 
+        actions:
+          allow: 1
+          output:
+            port: 1
+    - rule:
+        actions:
+          allow: 1
+
+  agg2_acl:
+    - rule:
+        dl_type: 0x0800
+        nw_src: "10.0.1.0/24"
+        nw_dst: "10.0.2.0/24"
+        actions:
+          allow: 0
+          output:
+            port: 4
+    - rule:
+        dl_type: 0x0800 
+        actions:
+          allow: 1
+          output:
+            port: 1
+    - rule:
+        actions:
+          allow: 1
+
+  core1_acl:
+    - rule:
+        dl_type: 0x0800
+        nw_src: "10.0.1.0/24"
+        actions:
+          allow: 1
+          output:
+            port: 3
+    - rule:
+        actions:
+          allow: 1
+  core2_acl:
+    - rule:
+        dl_type: 0x0800
+        nw_src: "10.0.2.0/24"
+        actions:
+          allow: 1
+          output:
+            port: 3
+    - rule:
+        actions:
+          allow: 1
+
+
+  core3_acl:
+    - rule:
+        dl_type: 0x0800
+        nw_dst: "10.0.1.0/24"
+        actions:
+          output:
+            port: 1
+          allow: 1
+    - rule:
+        dl_type: 0x0800
+        nw_dst: "10.0.2.0/24"
+        actions:
+          output:
+            port: 2
+          allow: 1
+    - rule:
+        actions:
+          allow: 1
+  
+
+
+
 vlans:
-    main:
-        vid: 100
-        description: "Primary VLAN"
-        unicast_flood: True
+  access1_vlan:
+    vid: 100
+    description: "access1 vlan"
+    faucet_vips: ["10.0.1.254/24"]
+    faucet_mac: "ee:00:00:00:00:11"
+
+  access2_vlan:
+    vid: 200
+    description: "access2_vlan vlan"
+    faucet_vips: ["10.0.2.254/24"]
+    faucet_mac: "ee:00:00:00:00:22"
+
+routers:
+  router-1:
+    vlans: [access1_vlan, access2_vlan]
 
 dps:
-    s1:  # Core Switch
-        dp_id: 0x1
-        hardware: "Open vSwitch"
+  s1:
+    dp_id: 0x1
+    hardware: "Open vSwitch"
+    stack:
+      priority: 1
+    interfaces:
+      1:
+        description: "core -> agg1"
         stack:
-            priority: 1
-        interfaces:
-            1:
-                description: "Core -> Agg1"
-                stack:
-                   dp: s2
-                   port: 1
-            2:
-                description: "Core -> Agg2"
-                stack:
-                   dp: s3
-                   port: 1
+          dp: s2
+          port: 1
+        acls_in: [core1_acl]
+      2:
+        description: "core -> agg2"
+        stack:
+          dp: s3
+          port: 1
+        acls_in: [core2_acl]
+      3:
+        description: "core -> hi"
+        acls_in: [core1_acl]
 
-    s2:  # Aggregation 1
-        dp_id: 0x2
-        hardware: "Open vSwitch"
-        interfaces:
-            1:
-                description: "Agg1 -> Core"
-                stack:
-                   dp: s1
-                   port: 1
-            2:
-                description: "Agg1 -> Agg2"
-                stack:
-                   dp: s3
-                   port: 2
-            3:
-                description: "Agg1 -> Access1"
-                stack:
-                   dp: s4
-                   port: 1
-            4:
-                description: "Agg1 -> Access2"
-                stack:
-                   dp: s5
-                   port: 1
+  s2:
+    dp_id: 0x2
+    hardware: "Open vSwitch"
+    interfaces:
+      1:
+        description: "agg1 -> core"
+        stack:
+          dp: s1
+          port: 1
+      2:
+        description: "agg1 -> agg2"
+        stack:
+          dp: s3
+          port: 2
+      3:
+        description: "agg1 -> access1"
+        stack:
+          dp: s4
+          port: 1
+      4:
+        description: "agg1 -> access2"
+        stack:
+          dp: s5
+          port: 1
+        acls_in: [agg1_acl]
 
-    s3:  # Aggregation 2
-        dp_id: 0x3
-        hardware: "Open vSwitch"
-        interfaces:
-            1:
-                description: "Agg2 -> Core"
-                stack:
-                   dp: s1
-                   port: 2
-            2:
-                description: "Agg2 -> Agg1"
-                stack:
-                   dp: s2
-                   port: 2
-            3:
-                description: "Agg2 -> Access1"
-                stack:
-                   dp: s4
-                   port: 2
-            4:
-                description: "Agg2 -> Access2"
-                stack:
-                   dp: s5
-                   port: 2
+  s3:
+    dp_id: 0x3
+    hardware: "Open vSwitch"
+    interfaces:
+      1:
+        description: "agg2 -> core"
+        stack:
+          dp: s1
+          port: 2
+      2:
+        description: "agg2 -> agg1"
+        stack:
+          dp: s2
+          port: 2
+      3:
+        description: "agg2 -> access1"
+        stack:
+          dp: s4
+          port: 2
+        acls_in: [agg2_acl]
+      4:
+        description: "agg2 -> access2"
+        stack:
+          dp: s5
+          port: 2
 
-    s4:  # Access 1
-        dp_id: 0x4
-        hardware: "Open vSwitch"
-        interfaces:
-            1:
-                description: "Access1 -> Agg1"
-                stack:
-                   dp: s2
-                   port: 3
-            2:
-                description: "Access1 -> Agg2"
-                stack:
-                   dp: s3
-                   port: 3
-            3:
-                name: "h1"
-                description: "h1"
-                native_vlan: main
-            4:
-                name: "h2"
-                description: "h2"
-                native_vlan: main
-            5:
-                name: "h3"
-                description: "h3"
-                native_vlan: main
+  s4:
+    dp_id: 0x4
+    hardware: "Open vSwitch"
+    interfaces:
+      1:
+        description: "access1 -> agg1"
+        stack:
+          dp: s2
+          port: 3
+      2:
+        description: "access1 -> agg2"
+        stack:
+          dp: s3
+          port: 3
+      3:
+        name: "h1"
+        description: "h1"
+        native_vlan: access1_vlan
+        acls_in: [network_access1_acl]
+      4:
+        name: "h2"
+        description: "h2"
+        native_vlan: access1_vlan
+        acls_in: [network_access1_acl]
+      5:
+        name: "h3"
+        description: "h3"
+        native_vlan: access1_vlan
+        acls_in: [network_access1_acl]
 
-    s5:  # Access 2
-        dp_id: 0x5
-        hardware: "Open vSwitch"
-        interfaces:
-            1:
-                description: "Access2 -> Agg1"
-                stack:
-                   dp: s2
-                   port: 4
-            2:
-                description: "Access2 -> Agg2"
-                stack:
-                   dp: s3
-                   port: 4
-            3:
-                name: "h4"
-                description: "h4"
-                native_vlan: main
-            4:
-                name: "h5"
-                description: "h5"
-                native_vlan: main
-            5:
-                name: "h6"
-                description: "h6"
-                native_vlan: main
+  s5:
+    dp_id: 0x5
+    hardware: "Open vSwitch"
+    interfaces:
+      1:
+        description: "access2_vlan -> agg1"
+        stack:
+          dp: s2
+          port: 4
+      2:
+        description: "access2_vlan -> agg2"
+        stack:
+          dp: s3
+          port: 4
+      3:
+        name: "h4"
+        description: "h4"
+        native_vlan: access2_vlan
+        acls_in: [network_access2_acl]
+      4:
+        name: "h5"
+        description: "h5"
+        native_vlan: access2_vlan
+        acls_in: [network_access2_acl]
+      5:
+        name: "h6"
+        description: "h6"
+        native_vlan: access2_vlan
+        acls_in: [network_access2_acl]
+
