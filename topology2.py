@@ -4,6 +4,7 @@ from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.node import RemoteController
 from mininet.cli import CLI
+from mininet.node import OVSBridge
 from time import sleep
 
 class ThreeLayerTopo(Topo):
@@ -117,11 +118,11 @@ class ThreeLayerTopo(Topo):
 
         # Add host internet
         internet = self.addHost('hi', ip='1.1.1.1/30', mac='00:00:00:00:00:ff', defaultRoute='via 1.1.1.2')
-        s = self.addSwitch('s100')  # regular L2 switch acting as relay for internet
+        s = self.addSwitch('s100', dpid='0000000000000100', protocols='OpenFlow14')  # regular L2 switch acting as relay for internet
         self.addLink(core1, s)  # s1-eth6 <-> hi (internet)
-        self.addLink(core1, s)  # s2-eth6 <-> hi (internet)
+        self.addLink(core2, s)  # s2-eth6 <-> hi (internet)
         self.addLink(s, internet) 
-        self.addLink(s, self.addHost('hx9', ip='1.1.1.2/30', mac='00:00:00:00:00:00')) # (internet's gateway)
+        self.addLink(s, self.addHost('hx9', ip='1.1.1.2/30', mac='00:00:00:00:00:ff')) # (internet's gateway)
 
 # topos = { 'threelayer': ( lambda: ThreeLayerTopo() ) }
 net = Mininet(topo=ThreeLayerTopo(), controller=RemoteController)

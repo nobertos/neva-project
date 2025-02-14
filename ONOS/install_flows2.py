@@ -48,7 +48,25 @@ if response.status_code == 200:
 
    
     for datapath in datapaths:
-        if datapath[-2] == "0":  # core switches
+        if datapath.endswith("100"):  # L2 switch
+            # ARP 
+            match = [{"type": "ETH_TYPE", "ethType": "0x0806"}]
+            action = [{"type": "OUTPUT", "port": "NORMAL"}]
+            add_flow(datapath, criterias=match, instructions=action, priority=60000)
+            # To internet
+            action = [{"type": "OUTPUT", "port": "3"}]
+            match = [{"type": "ETH_TYPE", "ethType": "0x0800"}, {"type": "IN_PORT", "port": "1"}]
+            add_flow(datapath, criterias=match, instructions=action)
+            match = [{"type": "ETH_TYPE", "ethType": "0x0800"}, {"type": "IN_PORT", "port": "2"}]
+            add_flow(datapath, criterias=match, instructions=action)
+            # From internet
+            match = [{"type": "ETH_TYPE", "ethType": "0x0800"}, {"type": "IN_PORT", "port": "3"}]
+            action = [{"type": "OUTPUT", "port": "1"}]
+            add_flow(datapath, criterias=match, instructions=action)
+            action = [{"type": "OUTPUT", "port": "2"}]
+            add_flow(datapath, criterias=match, instructions=action)
+
+        elif datapath[-2] == "0":  # core switches
             # routing to internet
             action = [{"type": "OUTPUT", "port": "6"}]
 
@@ -62,12 +80,6 @@ if response.status_code == 200:
             add_flow(datapath, criterias=match, instructions=action)
 
             # routing to hosts
-            """match = [{"type": "ETH_TYPE", "ethType": "0x0806"}, {"type": "IN_PORT", "port": "3"}]
-            action = [{"type": "OUTPUT", "port": "4"}]
-            add_flow(datapath, criterias=match, instructions=action)
-            match = [{"type": "ETH_TYPE", "ethType": "0x0806"}, {"type": "IN_PORT", "port": "4"}]
-            action = [{"type": "OUTPUT", "port": "3"}]
-            add_flow(datapath, criterias=match, instructions=action)"""
             # go to aggregation 1
             action = [{"type": "OUTPUT", "port": "2"}]
             match = [{"type": "ETH_TYPE", "ethType": "0x0800"}, {"type": "IPV4_DST", "ip": "10.0.1.0/24"}]
@@ -154,7 +166,7 @@ if response.status_code == 200:
                 add_flow(datapath, criterias=match, instructions=action, priority=60000)
 
             # routing to his hosts
-            match = [{"type": "ETH_TYPE", "ethType": "0x0800"}, {"type": "IPV4_DST", "ip": f"10.0.{i}.0/24"}]
+            match = [{"type": "ETH_TYPE", "ethType": "0x0800"}, {"type": "IPV4_DST", "ip": f"10.0.{num_switch}.0/24"}]
             action = [{"type": "OUTPUT", "port": "FLOOD"}]
             add_flow(datapath, criterias=match, instructions=action, priority=60000)
             match = [{"type": "ETH_TYPE", "ethType": "0x0806"}]
