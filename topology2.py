@@ -51,11 +51,14 @@ class ThreeLayerTopo(Topo):
 
         # Aggregation redundancy link
         self.addLink(agg11, agg12)    # s11-eth3 <-> s12-eth3
-        self.addLink(agg11, agg13)    # s11-eth4 <-> s13-eth3
-        self.addLink(agg11, agg14)    # s11-eth5 <-> s14-eth3
-        self.addLink(agg12, agg13)    # s12-eth4 <-> s13-eth4
-        self.addLink(agg12, agg14)    # s12-eth5 <-> s14-eth4
-        self.addLink(agg13, agg14)    # s13-eth5 <-> s14-eth5
+        self.addLink(agg13, agg14)    # s13-eth3 <-> s14-eth3
+
+        self.addLink(agg11, agg13)    # s11-eth4 <-> s13-eth4
+        self.addLink(agg12, agg13)    # s12-eth4 <-> s13-eth5
+
+        self.addLink(agg11, agg14)    # s11-eth5 <-> s14-eth4
+        self.addLink(agg12, agg14)    # s12-eth5 <-> s14-eth5
+
 
         # Aggregation to Access links
         self.addLink(agg11, access21) # s11-eth6 <-> s21-eth1
@@ -81,9 +84,9 @@ class ThreeLayerTopo(Topo):
         hosts.append(self.addHost('h1', ip='10.0.1.1/24', mac='00:00:00:00:00:01', defaultRoute='via 10.0.1.254'))
         hosts.append(self.addHost('hx1', ip='10.0.1.254/24', mac='00:00:00:00:00:ff'))
         hosts.append(self.addHost('h2', ip='10.0.2.1/24', mac='00:00:00:00:00:02', defaultRoute='via 10.0.2.254'))
-        hosts.append(self.addHost('hx1', ip='10.0.2.254/24', mac='00:00:00:00:00:ff'))
+        hosts.append(self.addHost('hx2', ip='10.0.2.254/24', mac='00:00:00:00:00:ff'))
         hosts.append(self.addHost('h3', ip='10.0.3.1/24', mac='00:00:00:00:00:03', defaultRoute='via 10.0.3.254'))
-        hosts.append(self.addHost('hx1', ip='10.0.3.254/24', mac='00:00:00:00:00:ff'))
+        hosts.append(self.addHost('hx3', ip='10.0.3.254/24', mac='00:00:00:00:00:ff'))
         hosts.append(self.addHost('h4', ip='10.0.4.1/24', mac='00:00:00:00:00:04', defaultRoute='via 10.0.4.254'))
         hosts.append(self.addHost('hx4', ip='10.0.4.254/24', mac='00:00:00:00:00:ff'))
         hosts.append(self.addHost('h5', ip='10.0.5.1/24', mac='00:00:00:00:00:05', defaultRoute='via 10.0.5.254'))
@@ -103,22 +106,22 @@ class ThreeLayerTopo(Topo):
         self.addLink(hosts[5], access23) # hx3 <-> s23-eth4
         self.addLink(hosts[6], access24) # h4 <-> s24-eth3
         self.addLink(hosts[7], access24) # hx4 <-> s24-eth4
-        self.addLink(hosts[8], access21) # h5 <-> s25-eth3
-        self.addLink(hosts[9], access21) # hx5 <-> s25-eth4
-        self.addLink(hosts[10], access22) # h6 <-> s26-eth3
-        self.addLink(hosts[11], access22) # hx6 <-> s26-eth4
-        self.addLink(hosts[12], access23) # h7 <-> s27-eth3
-        self.addLink(hosts[13], access23) # hx7 <-> s27-eth4
-        self.addLink(hosts[14], access24) # h8 <-> s28-eth3
-        self.addLink(hosts[15], access24) # hx8 <-> s28-eth4
+        self.addLink(hosts[8], access25) # h5 <-> s25-eth3
+        self.addLink(hosts[9], access25) # hx5 <-> s25-eth4
+        self.addLink(hosts[10], access26) # h6 <-> s26-eth3
+        self.addLink(hosts[11], access26) # hx6 <-> s26-eth4
+        self.addLink(hosts[12], access27) # h7 <-> s27-eth3
+        self.addLink(hosts[13], access27) # hx7 <-> s27-eth4
+        self.addLink(hosts[14], access28) # h8 <-> s28-eth3
+        self.addLink(hosts[15], access28) # hx8 <-> s28-eth4
 
         # Add host internet
-        internet = self.addHost('hi1', ip='1.1.1.1/30', mac='00:00:00:00:00:ff', defaultRoute='via 1.1.1.2')
-        self.addLink(internet, core1) # s1-eth6 <-> hi1 (internet)
-        self.addLink(core1, self.addHost('hx9', ip='1.1.1.2/30', mac='00:00:00:00:00:ff')) # s1-eth7 <-> hx9 (internet's gateway)
-        internet = self.addHost('hi2', ip='2.2.2.2/30', mac='00:00:00:00:00:ff', defaultRoute='via 2.2.2.1')
-        self.addLink(internet, core1) # s2-eth6 <-> hi2 (internet)
-        self.addLink(core1, self.addHost('hx10', ip='2.2.2.1/30', mac='00:00:00:00:00:ff')) # s2-eth7 <-> hx10 (internet's gateway)
+        internet = self.addHost('hi', ip='1.1.1.1/30', mac='00:00:00:00:00:ff', defaultRoute='via 1.1.1.2')
+        s = self.addSwitch('s100')  # regular L2 switch acting as relay for internet
+        self.addLink(core1, s)  # s1-eth6 <-> hi (internet)
+        self.addLink(core1, s)  # s2-eth6 <-> hi (internet)
+        self.addLink(s, internet) 
+        self.addLink(s, self.addHost('hx9', ip='1.1.1.2/30', mac='00:00:00:00:00:00')) # (internet's gateway)
 
 # topos = { 'threelayer': ( lambda: ThreeLayerTopo() ) }
 net = Mininet(topo=ThreeLayerTopo(), controller=RemoteController)
