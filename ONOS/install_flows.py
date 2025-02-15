@@ -2,14 +2,6 @@ import copy
 import json
 import requests
 
-# REST API url and headers
-host = "localhost"
-port = "8181"
-username = "karaf"
-password = "karaf"
-url = f"http://{host}:{port}/onos/v1/flows"
-headers = {'Content-type': 'application/json'}
-
 datapaths = ["of:0000000000000005", "of:0000000000000004", "of:0000000000000003", "of:0000000000000002", "of:0000000000000001"]
 flows = []
 flow = {"priority": 50000, "timeout": 0, "isPermanent": True, "deviceId": "", 
@@ -109,6 +101,15 @@ for datapath in datapaths:
         match = [{"type": "ETH_TYPE", "ethType": "0x0806"}]
         action = [{"type": "OUTPUT", "port": "NORMAL"}]
         add_flow(datapath, criterias=match, instructions=action, priority=60000)
+
+
+# REST API url and headers
+host = "localhost"
+port = "8181"
+username = "karaf"
+password = "karaf"
+url = f"http://{host}:{port}/onos/v1/flows"
+headers = {'Content-type': 'application/json'}
 
 resp = requests.post(
     url,

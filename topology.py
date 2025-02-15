@@ -72,42 +72,20 @@ class ThreeLayerTopo(Topo):
 net = Mininet(topo=ThreeLayerTopo(), controller=RemoteController)
 net.start()
 
-# to collect packets
-"""net.get('h1').cmd("tcpdump -i h1-eth0 -w h1-eth0.pcap &")
-net.get('h2').cmd("tcpdump -i h2-eth0 -w h2-eth0.pcap &")
-net.get('h3').cmd("tcpdump -i h3-eth0 -w h3-eth0.pcap &")
-net.get('h4').cmd("tcpdump -i h4-eth0 -w h4-eth0.pcap &")
-net.get('h5').cmd("tcpdump -i h5-eth0 -w h5-eth0.pcap &")
-net.get('h6').cmd("tcpdump -i h6-eth0 -w h6-eth0.pcap &")
-net.get('hi').cmd("tcpdump -i hi-eth0 -w hi-eth0.pcap &")
-
-net.get('s1').cmd("tcpdump -i s1-eth1 -w s1-eth1.pcap &")
-net.get('s1').cmd("tcpdump -i s1-eth2 -w s1-eth2.pcap &")
-
-net.get('s2').cmd("tcpdump -i s2-eth2 -w s2-eth2.pcap &")
-
-net.get('s2').cmd("tcpdump -i s2-eth3 -w s2-eth3.pcap &")
-net.get('s2').cmd("tcpdump -i s2-eth4 -w s2-eth4.pcap &")
-net.get('s3').cmd("tcpdump -i s3-eth3 -w s3-eth3.pcap &")
-net.get('s3').cmd("tcpdump -i s3-eth4 -w s3-eth4.pcap &")"""
-
 # to perform iperf
-net.get('hi').cmd("iperf -s -u &")
-net.get('h2').cmd("iperf -s &")
-net.get('h5').cmd("iperf -s &")
-sleep(3)
+net.get('hi').cmd("iperf -s &")
+print("sleeping...")
+sleep(15)
 
-net.get('h1').cmd("iperf -c -u 1.1.1.1 -t 30 &")
-net.get('h4').cmd("iperf -c -u 1.1.1.1 -t 30 &")
-net.get('h3').cmd("iperf -c 10.0.2.5 -t 30 &")
-net.get('h6').cmd("iperf -c 10.0.1.2 -t 30 &")
 
 # perform ping
-net.get('h1').cmd("ping h2 &")
-net.get('h4').cmd("ping h5 &")
-net.get('h3').cmd("ping h6 &")
-net.get('h1').cmd("ping hi &")
-net.get('h4').cmd("ping hi &")
+net.get('h1').cmd("ping 10.0.2.5 &")
+net.get('h4').cmd("ping 10.0.1.3 &")
+net.get('h2').cmd("ping 10.0.1.1 &")
+net.get('h5').cmd("ping 1.1.1.1 &")
+net.get('h1').cmd("ping 1.1.1.1 &")
+
+
 
 CLI(net)  # Open the Mininet CLI
 net.stop()  # Stop the network when done
