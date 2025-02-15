@@ -4,13 +4,6 @@ import matplotlib
 matplotlib.use('Agg')  
 import matplotlib.pyplot as plt
 
-# ONOS REST API details
-host = "localhost"
-port = "8181"
-username = "karaf"
-password = "karaf"
-url = f"http://{host}:{port}/onos/v1/flows"
-
 def plot_packet_statistics(useful_packets, useless_packets):
     plt.figure(figsize=(12, 6))
     
@@ -37,6 +30,13 @@ def plot_packet_statistics(useful_packets, useless_packets):
     plt.close()
 
 # Retrieve flow statistics
+
+# ONOS REST API details
+host = "localhost"
+port = "8181"
+username = "karaf"
+password = "karaf"
+url = f"http://{host}:{port}/onos/v1/flows"
 
 response = requests.get(url, auth=(username, password))
 
