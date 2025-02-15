@@ -13,13 +13,6 @@ def analyze_pcap(file_path):
         return 0, 0
 
     try:
-        # Check if tshark is installed
-        subprocess.check_call(["tshark", "-v"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except subprocess.CalledProcessError:
-        print("tshark is not installed. Please install it using 'sudo apt-get install tshark'.")
-        return 0, 0
-
-    try:
         # Use tshark to count packets
         packet_count = int(subprocess.check_output(
             f"tshark -r {file_path} -T fields -e frame.number | wc -l", shell=True
@@ -74,32 +67,34 @@ def calculate_delay(pcap_file1, pcap_file2):
 
 def calculate_statistics():
     """Calculate statistics from tcpdump capture files."""
-    user_packets = {'count': 0, 'size': 0}
-    useless_packets = {'count': 0, 'size': 0}
+    control_packets = {'count': 0, 'size': 0}
+    data_packets = {'count': 0, 'size': 0}
 
-    # Analyze host capture files
+    # Analyze control plane traffic
+    control_count, control_size = analyze_pcap("control.pcap")
+    control_packets['count'] += control_count
+    control_packets['size'] += control_size
+
+    # Analyze data plane traffic
+    # Host captures
     for i in range(1, 7):
         file_path = f"h{i}.pcap"
         packet_count, total_size = analyze_pcap(file_path)
-        if i <= 3:
-            user_packets['count'] += packet_count
-            user_packets['size'] += total_size
-        else:
-            useless_packets['count'] += packet_count
-            useless_packets['size'] += total_size
+        data_packets['count'] += packet_count
+        data_packets['size'] += total_size
 
-    # Analyze switch capture files
+    # Switch data plane captures
     switches = ['s1', 's2', 's3']
     for sw in switches:
         for eth in range(1, 5):
             file_path = f"{sw}-eth{eth}.pcap"
             packet_count, total_size = analyze_pcap(file_path)
-            useless_packets['count'] += packet_count
-            useless_packets['size'] += total_size
+            data_packets['count'] += packet_count
+            data_packets['size'] += total_size
 
     # Calculate global statistics
-    global_packets = user_packets['count'] + useless_packets['count']
-    global_size = user_packets['size'] + useless_packets['size']
+    global_packets = control_packets['count'] + data_packets['count']
+    global_size = control_packets['size'] + data_packets['size']
 
     if global_packets == 0 or global_size == 0:
         print("No packets found in capture files.")
@@ -107,8 +102,8 @@ def calculate_statistics():
 
     # Print statistics
     print(f"Global number of packets: {global_packets}, Global size of packets: {global_size}")
-    print(f"User number of packets: {user_packets['count']} ({round(user_packets['count'] / global_packets, 5) * 100}%), User size of packets: {user_packets['size']} ({round(user_packets['size'] / global_size, 5) * 100}%)")
-    print(f"Useless number of packets: {useless_packets['count']} ({round(useless_packets['count'] / global_packets, 5) * 100}%), Useless size of packets: {useless_packets['size']} ({round(useless_packets['size'] / global_size, 5) * 100}%)")
+    print(f"Control Packets: {control_packets['count']} ({control_packets['count'] / global_packets * 100:.2f}%), Control size: {control_packets['size']} ({control_packets['size'] / global_size * 100:.2f}%)")
+    print(f"Data Packets: {data_packets['count']} ({data_packets['count'] / global_packets * 100:.2f}%), Data size: {data_packets['size']} ({data_packets['size'] / global_size * 100:.2f}%)")
 
     # Calculate packet loss from ping tests
     with open("ping_h1_h2.txt", "r") as f:
@@ -156,6 +151,10 @@ def setup_network():
     print(" Starting Network")
     net.start()
 
+    # Start control plane capture
+    print("Starting control plane capture...")
+    subprocess.Popen("sudo tcpdump -i lo -w control.pcap port 6653 &", shell=True)
+
     print("Running Benchmarks...")
 
     # Start tcpdump on hosts
@@ -199,6 +198,9 @@ def setup_network():
     for sw in switches:
         for eth in range(1, 5):
             net.get(sw).cmd("pkill tcpdump")
+
+    # Stop control plane capture
+    subprocess.call("sudo pkill -f 'tcpdump -i lo'", shell=True)
 
     # Analyze tcpdump files and calculate statistics
     print("Analyzing tcpdump files...")
